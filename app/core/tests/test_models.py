@@ -2,6 +2,7 @@
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from core import models
 
 
 class ModelTests(TestCase):
@@ -46,3 +47,19 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_card(self):
+        '''Test creating a card is sucessful.'''
+        user = get_user_model().objects.create_user(
+            'test@example.com',
+            'testpass123',
+        )
+        card = models.Card.objects.create(
+            user=user,
+            title="Costa Southgate",
+            business_name="Costa",
+            points_needed=10,
+            description="Every 10 coffees you get one for free",
+        )
+
+        self.assertEqual(str(card), card.title)
