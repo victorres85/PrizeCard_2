@@ -67,7 +67,7 @@ class Company(models.Model):
     active = models.BooleanField(default=True)
     lat = models.CharField(max_length=20, null=True, blank=True)
     long = models.CharField(max_length=20, null=True, blank=True)
-    logo = models.ImageField(upload_to='media/businesses/%y/%m/%d', blank=True)
+    logo = models.ImageField(upload_to='media/companies/%y/%m/%d', blank=True)
 
     def __str__(self):
         return self.company_name
