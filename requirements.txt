@@ -3,6 +3,13 @@ djangorestframework>=3.12.4,<3.13
 psycopg2>=2.8.6,<2.9
 drf-spectacular>=0.15.1,<0.16
 
+
+django-cors-headers==3.13.0
+django-countries==7.4.2
+django-phonenumber-field==7.0.0
+phonenumbers==8.13.1
+Pillow==9.3.0
+
 amqp==5.1.1
 asgiref==3.5.2
 async-timeout==4.0.2
@@ -23,7 +30,6 @@ ipapi==1.0.4
 ipify==1.0.0
 kombu==5.2.4
 packaging==21.3
-Pillow==9.3.0
 prompt-toolkit==3.0.32
 pyparsing==3.0.9
 pytz==2022.6

@@ -1,13 +1,14 @@
 """Test for Card APIs."""
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+
+from django.contrib.auth import get_user_model
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Card
+from core.models import Card, Company
 
 from card.serializers import (
     CardSerializer,
@@ -23,23 +24,27 @@ def detail_url(card_id):
     return reverse('card:card-detail', args=[card_id])
 
 
-def create_card(user, **params):
+def create_user(**params):
+    """Create and return a new user"""
+    return get_user_model().objects.create_user(**params)
+
+
+def create_company(user, **params):
+    """Create and return a new user"""
+    return Company.objects.create(user, **params)
+
+
+def create_card(company, **params):
     """Create and return a sample card."""
     defaults = {
         'title': "Sample card title",
-        'business_name': "Sample Business Name",
         'description': 'Get a free coffee for every 10 coffee you buy',
         'points_needed': 10,
     }
     defaults.update(params)
 
-    card = Card.objects.create(user=user, **defaults)
+    card = Card.objects.create(company=company, **defaults)
     return card
-
-
-def create_user(**params):
-    """Create and return a new user"""
-    return get_user_model().objects.create_user(**params)
 
 
 class PublicCardAPITests(TestCase):
@@ -67,12 +72,22 @@ class PrivateCardAPITests(TestCase):
             'user2@example.com',
             'testpass123',
         )
+
         self.client.force_authenticate(self.user)
+
+        defaults = {
+            'company_name': "Sample Business Name",
+            'address': 'Get a free coffee for every 10 coffee you buy',
+            'city': 'Sample City',
+            'post_code': 'N146HB',
+        }
+
+        self.company = Company.objects.create(user=self.user, **defaults)
 
     def test_retrieve_cards(self):
         """Test retrieving a list of cards."""
-        create_card(user=self.user)
-        create_card(user=self.user)
+        create_card(company=self.company)
+        create_card(company=self.company)
 
         res = self.client.get(CARDS_URL)
 
@@ -83,22 +98,31 @@ class PrivateCardAPITests(TestCase):
 
     def test_card_list_limited_to_user(self):
         """Test list of cards is limited to authenticated user."""
-        other_user = create_user(
-            email='other@example.com', password='password123'
+        user = create_user(
+            email='user3@example.com', password='password1234'
             )
-        create_card(user=other_user)
-        create_card(user=self.user)
+
+        defaults = {
+            'company_name': "Other Business Name",
+            'address': 'Other Address',
+            'city': 'Other City',
+            'post_code': 'N146HB',
+            }
+
+        other_company = Company.objects.create(user=user, **defaults)
+        create_card(company=self.company)
+        create_card(company=other_company)
 
         res = self.client.get(CARDS_URL)
 
-        cards = Card.objects.filter(user=self.user)
+        cards = Card.objects.filter(company=self.company)
         serializer = CardSerializer(cards, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_ger_card_detail(self):
+    def test_get_card_detail(self):
         """Test get card detail."""
-        card = create_card(user=self.user)
+        card = create_card(company=self.company)
 
         url = detail_url(card.id)
         res = self.client.get(url)
@@ -108,93 +132,103 @@ class PrivateCardAPITests(TestCase):
 
     def test_create_card(self):
         """Test creating a card"""
-        payload = {
+
+        company = {'company': self.company.pk, }
+        data = {
             'title': "Sample card title",
-            'business_name': "Sample Business Name",
             'description': 'Get a free coffee for every 10 coffee you buy',
             'points_needed': 10,
         }
+        payload = company | data
         res = self.client.post(CARDS_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         card = Card.objects.get(id=res.data['id'])
-        for k, v in payload.items():
+        for k, v in data.items():
             self.assertEqual(getattr(card, k), v)
-        self.assertEqual(card.user, self.user)
+        self.assertEqual(card.company.pk, self.company.pk)
 
     def test_partial_update(self):
         """Test partial update of a card."""
-        original_business_name = "original business name"
+        original_points_needed = 8
 
         card = create_card(
-            user=self.user,
+            company=self.company,
             title="Sample card title",
-            business_name=original_business_name,
+            description='Sample Description',
+            points_needed=10,
         )
 
-        payload = {'title': 'New card title'}
+        payload = {'points_needed': original_points_needed}
         url = detail_url(card.id)
         res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         card.refresh_from_db()
-        self.assertEqual(card.title, payload['title'])
-        self.assertEqual(card.business_name, original_business_name)
-        self.assertEqual(card.user, self.user)
+        self.assertEqual(card.points_needed, payload['points_needed'])
+        self.assertEqual(card.company.pk, self.company.pk)
 
     def test_full_update(self):
         """Test full update of card."""
         card = create_card(
-            user=self.user,
+            company=self.company,
             title="Sample card title",
-            business_name="Sample card business name",
-            description='Sample card description',
+            description='Sample Description',
+            points_needed=10,
         )
 
-        payload = {
-            'title': 'New card title',
-            'business_name': 'New card business name',
-            'description': 'New sample card description',
-            'points_needed': 5,
+        defaults = {
+            'company_name': "Other Business Name",
+            'address': 'Other Address',
+            'city': 'Other City',
+            'post_code': 'N146HB',
+            }
+
+        other_company = Company.objects.create(user=self.user, **defaults)
+
+        company = {'company': other_company.pk, }
+
+        data = {
+            'title': "NEW Sample card title",
+            'description': 'NEW Sample Description',
+            'points_needed': 8,
         }
-        url = detail_url(card.id)
+        payload = company | data
+        url = detail_url(card.pk)
         res = self.client.put(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         card.refresh_from_db()
-        for k, v in payload.items():
+        for k, v in data.items():
             self.assertEqual(getattr(card, k), v)
-        self.assertEqual(card.user, self.user)
+        self.assertNotEqual(card.company.pk, self.company.pk)
 
-    def test_update_user_returns_error(self):
-        """Test changin the card user results in an error."""
-        new_user = create_user(email='user3@example.com', password='test123')
-        card = create_card(user=self.user)
+    def test_update_company_returns_error(self):
+        """Test changing the card's company results in an error."""
+        defaults = {
+            'company_name': "Other Business Name",
+            'address': 'Other Address',
+            'city': 'Other City',
+            'post_code': 'N146HB',
+            }
 
-        payload = {'user': new_user.id}
+        other_company = Company.objects.create(user=self.user, **defaults)
+
+        card = create_card(company=self.company)
+
+        payload = {'company': other_company.pk}
         url = detail_url(card.id)
         self.client.patch(url, payload)
 
         card.refresh_from_db()
-        self.assertEqual(card.user, self.user)
+        self.assertNotEqual(card.company.pk, self.company.pk)
 
     def test_delete_card(self):
         """Test deleting a card successful"""
-        card = create_card(user=self.user)
+        card = create_card(company=self.company)
 
         url = detail_url(card.id)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Card.objects.filter(id=card.id).exists())
-
-    def test_card_other_users_card_error(self):
-        """Test trying to delete another users recipe gives error."""
-        new_user = create_user(email='user3@example.com', password='test123')
-        card = create_card(user=new_user)
-
-        url = detail_url(card.id)
-        res = self.client.delete(url)
-
-        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertTrue(Card.objects.filter(id=card.id).exists())

@@ -5,6 +5,32 @@ from django.contrib.auth import get_user_model
 from core import models
 
 
+def create_user():
+    """Create and return a new user"""
+    user = get_user_model().objects.create_user(
+            email='test@example.com',
+            password='test123',
+        )
+    return user
+
+
+def create_company(**params):
+    """Create abd return a sample company."""
+    user = create_user()
+    defaults = {
+        'company_name': 'Company Sample',
+        'address': 'Addres Sample',
+        'city': 'City Sample',
+        'post_code': 'n146hb',
+        'country': 'GB',
+        'phone_number': '07518946014',
+    }
+    defaults.update(params)
+
+    company = models.Company.objects.create(user=user, **defaults)
+    return company
+
+
 class ModelTests(TestCase):
     '''Test models.'''
 
@@ -48,16 +74,30 @@ class ModelTests(TestCase):
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
 
-    def test_create_card(self):
-        '''Test creating a card is sucessful.'''
+    def test_create_company(self):
+        '''Test creating a company is sucessful.'''
         user = get_user_model().objects.create_user(
             'test@example.com',
             'testpass123',
         )
-        card = models.Card.objects.create(
+        company = models.Company.objects.create(
             user=user,
+            company_name='Company Sample',
+            address='Addres Sample',
+            city='City Sample',
+            post_code='n146hb',
+            country='GB',
+            phone_number='07518946014',
+        )
+
+        self.assertEqual(str(company), company.company_name)
+
+    def test_create_card(self):
+        '''Test creating a card is sucessful.'''
+        company = create_company()
+        card = models.Card.objects.create(
+            company=company,
             title="Costa Southgate",
-            business_name="Costa",
             points_needed=10,
             description="Every 10 coffees you get one for free",
         )

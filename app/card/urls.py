@@ -9,7 +9,7 @@ from rest_framework.routers import DefaultRouter
 from card import views
 
 router = DefaultRouter()
-router.register('cards', views.CardViewSet)
+router.register('', views.CardViewSet)
 
 app_name = 'card'
 
