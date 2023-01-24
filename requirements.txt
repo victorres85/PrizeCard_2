@@ -3,7 +3,7 @@ djangorestframework>=3.12.4,<3.13
 psycopg2>=2.8.6,<2.9
 drf-spectacular>=0.15.1,<0.16
 
-
+django-extensions
 django-cors-headers==3.13.0
 django-countries==7.4.2
 django-phonenumber-field==7.0.0

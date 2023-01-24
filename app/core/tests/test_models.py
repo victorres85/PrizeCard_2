@@ -103,3 +103,18 @@ class ModelTests(TestCase):
         )
 
         self.assertEqual(str(card), card.title)
+
+    def test_create_shopper(self):
+        '''Test creating a shooper is sucessful.'''
+        user = create_user()
+        shooper = models.Shopper.objects.create(
+            user=user,
+            first_name="Sample First Name",
+            last_name="Sample Last Name",
+            address="Sample Addres",
+            city="Sample City",
+            post_code="N146HB"
+        )
+
+        self.assertEqual(
+            str(shooper), f'{shooper.first_name} {shooper.last_name}')

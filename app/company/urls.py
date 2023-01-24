@@ -1,15 +1,12 @@
 """URL mappings for the company app."""
 
-from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from company import views
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=True)
 router.register('', views.CompanyViewSet)
 
 app_name = 'company'
 
-urlpatterns = [
-    path('', include(router.urls))
-]
+urlpatterns = router.urls

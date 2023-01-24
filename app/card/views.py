@@ -18,7 +18,6 @@ class CardViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Retrieve cards for authenticated user."""
-
         companies = list(Company.objects.all().filter(
             user=self.request.user).values_list('id'))
 

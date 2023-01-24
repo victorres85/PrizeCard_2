@@ -94,11 +94,11 @@ class PrivateCompanyAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         # self.assertEqual(res.data, serializer.data)
 
-    def test_ger_card_detail(self):
+    def test_ger_company_detail(self):
         """Test get company detail."""
         company = create_company(user=self.user)
 
-        url = detail_url(company.id)
+        url = detail_url(company.pk)
         res = self.client.get(url)
 
         serializer = CompanyDetailSerializer(company)

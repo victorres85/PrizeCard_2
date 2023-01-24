@@ -41,12 +41,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'drf_spectacular',
+    'django_extensions',
     'django_countries',
     'phonenumber_field',
     'core',
     'user',
     'company',
     'card',
+    'shopper',
 ]
 
 MIDDLEWARE = [

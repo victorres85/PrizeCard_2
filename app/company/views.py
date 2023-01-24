@@ -27,15 +27,25 @@ class CompanyViewSet(viewsets.ModelViewSet):
     def list(self, request, pk=None):
         """Return the serrializer class for request."""
         # Get IP info once
-        ip_info = requests.get('https://api64.ipify.org?format=json').json()
+        ip_info = requests.get(
+            'https://api64.ipify.org?format=json').json()
         ip_address = ip_info["ip"]
         response = requests.get(
             f'http://api.ipstack.com/{ip_address}?access_key='
             '8eba29fcae0bbc63c1e93b8c370e4bcf').json()
         latitude = response.get("latitude")
         longitude = response.get("longitude")
-        first = (float(latitude), float(longitude))
-
+        if not response['success']:
+            first = (51.633789, -0.125860)
+            print('''
+            IMPORTANT:
+            usage_limit_reached
+            Your monthly usage limit has been reached
+            Please upgrade your Subscription Plan
+            http://api.ipstack.com/
+            ''')
+        else:
+            first = (float(latitude), float(longitude))
         # Calculate distances for all companies
         # and pass them as a context to our serializer
         companies = Company.objects.all()

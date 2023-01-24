@@ -15,7 +15,6 @@ from card.serializers import (
     CardDetailSerializer,
 )
 
-
 CARDS_URL = reverse('card:card-list')
 
 

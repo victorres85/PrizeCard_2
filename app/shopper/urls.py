@@ -1,15 +1,15 @@
-"""URL mappings for the card app."""
+"""URL mappings for the company app."""
 
 from django.urls import path, include
-
 from rest_framework.routers import DefaultRouter
 
-from card import views
+from shopper.views import ShopperViewset
 
 router = DefaultRouter()
-router.register('', views.CardViewSet)
+router.register('', ShopperViewset)
 
-app_name = 'card'
+
+app_name = 'shopper'
 
 urlpatterns = [
     path('', include(router.urls))
