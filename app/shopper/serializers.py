@@ -11,7 +11,7 @@ class ShopperSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shopper
         fields = ['id', 'first_name', 'last_name',
-                  'lat', 'long', 'profile_picture']
+                  'lat', 'long']
 
 
 class ShopperDetailSerializer(ShopperSerializer):

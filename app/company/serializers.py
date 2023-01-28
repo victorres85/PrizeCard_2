@@ -26,3 +26,13 @@ class CompanyDetailSerializer(CompanySerializer):
                   'address', 'address2', 'city', 'region',
                   'post_code', 'country', 'phone_number', 'active'
                   ]
+
+
+class CompanyImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to companies."""
+
+    class Meta:
+        model = Company
+        fields = ['id', 'logo']
+        read_only_fields = ['id']
+        extra_kwargs = {'logo': {'required': 'True'}}

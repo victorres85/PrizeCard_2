@@ -205,3 +205,24 @@ class PrivateCardAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(MyCards.objects.filter(id=mycards.id).exists())
+
+    # def test_create_mycards(self):
+    #     """Test creating a mycards"""
+
+    #     fks = {
+    #         'shopper': self.shopper.pk,
+    #         'card': self.card.pk,
+    #     }
+    #     data = {
+    #         'points': 0,
+    #         'code': "code",
+    #     }
+
+    #     payload = fks | data
+    #     res = self.client.post(MYCARDS_URL, payload)
+
+    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+    #     mycards = MyCards.objects.get(id=res.data['id'])
+    #     for k, v in payload.items():
+    #         self.assertEqual(getattr(mycards, k), v)
+    #     self.assertEqual(mycards.shopper.pk, self.shopper.pk)

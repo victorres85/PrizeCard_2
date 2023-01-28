@@ -1,5 +1,8 @@
 """Databade models."""
 
+import uuid
+import os
+
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -12,6 +15,24 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from geopy.geocoders import Nominatim
+
+
+def company_image_file_path(instance, filename):
+    """Generate file path for new company image."""
+
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('uploads', 'company', filename)
+
+
+def mycards_image_file_path(instance, filename):
+    """Generate file path for new mycards image."""
+
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('uploads', 'mycards', filename)
 
 
 class UserManager(BaseUserManager):
@@ -67,8 +88,8 @@ class Company(models.Model):
     active = models.BooleanField(default=True)
     lat = models.CharField(max_length=20, null=True, blank=True)
     long = models.CharField(max_length=20, null=True, blank=True)
-    # logo = models.ImageField(
-    # upload_to='media/companies/%y/%m/%d', null=True, blank=True)
+    logo = models.ImageField(
+        upload_to=company_image_file_path, null=True, blank=True)
 
     def __str__(self):
         return self.company_name
@@ -116,8 +137,6 @@ class Shopper(models.Model):
     active = models.BooleanField(default=True)
     lat = models.CharField(max_length=20, null=True, blank=True)
     long = models.CharField(max_length=20, null=True, blank=True)
-    profile_picture = models.ImageField(
-        upload_to='media/shopper/%y/%m/%d', blank=True, null=True)
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
@@ -136,6 +155,7 @@ class MyCards(models.Model):
     shopper = models.ForeignKey(
         Shopper, on_delete=models.CASCADE, editable=False)
     card = models.ForeignKey(Card, on_delete=models.CASCADE, editable=False)
+    image = models.ImageField(upload_to=mycards_image_file_path, null=True)
     points = models.IntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
