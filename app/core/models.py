@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Company(models.Model):
-    """Card object."""
+    """Company object."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
@@ -67,7 +67,8 @@ class Company(models.Model):
     active = models.BooleanField(default=True)
     lat = models.CharField(max_length=20, null=True, blank=True)
     long = models.CharField(max_length=20, null=True, blank=True)
-    logo = models.ImageField(upload_to='media/companies/%y/%m/%d', blank=True)
+    # logo = models.ImageField(
+    # upload_to='media/companies/%y/%m/%d', null=True, blank=True)
 
     def __str__(self):
         return self.company_name
@@ -97,6 +98,7 @@ class Card(models.Model):
 
 
 class Shopper(models.Model):
+    """Shopper Object"""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -127,3 +129,40 @@ class Shopper(models.Model):
         self.long = location.longitude
 
         return super().save(*args, **kwargs)
+
+
+class MyCards(models.Model):
+    """My_Cards Object"""
+    shopper = models.ForeignKey(
+        Shopper, on_delete=models.CASCADE, editable=False)
+    card = models.ForeignKey(Card, on_delete=models.CASCADE, editable=False)
+    points = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    code = models.CharField(max_length=6, blank=True, null=True)
+
+    def __str__(self):
+        return self.card.company.company_name
+
+
+class MyCardsHistory(models.Model):
+    """My Cards History Object"""
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.DO_NOTHING,
+        blank=True, null=True
+        )
+    shopper = models.ForeignKey(Shopper, on_delete=models.CASCADE)
+    card = models.ForeignKey(Card, on_delete=models.CASCADE, blank=True)
+    code = models.CharField(max_length=6, blank=True)
+    finalized = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.shopper.user.email} - {self.card.company.company_name}"
+
+
+class Receipt(models.Model):
+    """Receipt Object"""
+    receipt_key = models.CharField(max_length=300, unique=True)
+    card = models.ForeignKey(Card, on_delete=models.DO_NOTHING)
+    Shopper = models.ForeignKey(Shopper, on_delete=models.DO_NOTHING)

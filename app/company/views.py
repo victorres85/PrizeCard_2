@@ -64,4 +64,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Create a new recipe."""
-        serializer.save(user=self.request.user)
+        if self.request.user.is_staff:
+            serializer.save(user=self.request.user)
+        else:
+            raise 'only super user are allowed to create a company object'

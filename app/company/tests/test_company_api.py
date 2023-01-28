@@ -11,7 +11,7 @@ from core.models import Company
 from company.serializers import CompanyDetailSerializer
 
 
-COMPANY_URL = reverse('company:company-list')
+COMPANY_URL = reverse('company-list')
 
 
 def create_company(user, **params):
@@ -32,12 +32,12 @@ def create_company(user, **params):
 
 def create_user(**params):
     """Create and return a new user"""
-    return get_user_model().objects.create_user(**params)
+    return get_user_model().objects.create_superuser(**params)
 
 
 def detail_url(company_id):
     """Create and return a company detail URL"""
-    return reverse('company:company-detail', args=[company_id])
+    return reverse('company-detail', args=[company_id])
 
 
 class PublicCardAPITests(TestCase):
@@ -58,10 +58,10 @@ class PrivateCompanyAPITests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user(
-            email='user@example.com', password='password1234'
-            )
-        self.user = get_user_model().objects.create_user(
+        # self.user = create_user(
+        #     email='user@example.com', password='password1234'
+        #     )
+        self.user = get_user_model().objects.create_superuser(
             'user2@example.com',
             'testpass123',
         )

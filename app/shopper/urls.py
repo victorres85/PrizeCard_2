@@ -1,16 +1,18 @@
 """URL mappings for the company app."""
 
+from rest_framework_nested import routers
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 
 from shopper.views import ShopperViewset
+from mycards.views import MycardsViewSet
 
-router = DefaultRouter()
-router.register('', ShopperViewset)
+router = routers.SimpleRouter()
+router.register(r'', ShopperViewset)
 
-
-app_name = 'shopper'
+shoppers_router = routers.NestedSimpleRouter(router, r'', lookup='shopper')
+shoppers_router.register(r'mycards', MycardsViewSet)
 
 urlpatterns = [
-    path('', include(router.urls))
+    path(r'', include(router.urls)),
+    path(r'', include(shoppers_router.urls)),
 ]

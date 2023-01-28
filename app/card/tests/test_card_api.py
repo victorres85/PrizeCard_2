@@ -15,12 +15,12 @@ from card.serializers import (
     CardDetailSerializer,
 )
 
-CARDS_URL = reverse('card:card-list')
+CARDS_URL = reverse('card-list', args=[1])
 
 
 def detail_url(card_id):
     """Create and return a card detail URL"""
-    return reverse('card:card-detail', args=[card_id])
+    return reverse('card-detail', args=[1, card_id])
 
 
 def create_user(**params):

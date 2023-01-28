@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from core.models import Shopper
 from shopper.serializers import ShopperSerializer, ShopperDetailSerializer
 
-SHOPPER_URL = reverse('shopper:shopper-list')
+SHOPPER_URL = reverse('shopper-list')
 
 
 def create_shopper(user, **params):
@@ -36,7 +36,7 @@ def create_user(**params):
 
 def detail_url(shopper_id):
     """Create and return a shopper detail URL"""
-    return reverse('shopper:shopper-detail', args=[shopper_id])
+    return reverse('shopper-detail', args=[shopper_id])
 
 
 class PublicShopperAPITests(TestCase):

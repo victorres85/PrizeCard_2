@@ -10,7 +10,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-        fields = ['id', 'company_name', 'lat', 'long', 'logo', 'distance']
+        fields = ['id', 'company_name', 'lat', 'long', 'distance']
 
     def get_distance(self, company):
         """Return context"""
@@ -22,7 +22,7 @@ class CompanyDetailSerializer(CompanySerializer):
 
     class Meta:
         model = Company
-        fields = ['id', 'company_name', 'lat', 'long', 'logo',
+        fields = ['id', 'company_name', 'lat', 'long',
                   'address', 'address2', 'city', 'region',
                   'post_code', 'country', 'phone_number', 'active'
                   ]
