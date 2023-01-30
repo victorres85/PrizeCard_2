@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'company',
     'card',
     'shopper',
+    'mycards',
 ]
 
 MIDDLEWARE = [

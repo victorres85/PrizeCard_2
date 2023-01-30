@@ -157,8 +157,8 @@ class Shopper(models.Model):
 class MyCards(models.Model):
     """My_Cards Object"""
     shopper = models.ForeignKey(
-        Shopper, on_delete=models.CASCADE, editable=False)
-    card = models.ForeignKey(Card, on_delete=models.CASCADE, editable=False)
+        Shopper, on_delete=models.CASCADE)
+    card = models.ForeignKey(Card, on_delete=models.CASCADE)
     image = models.ImageField(upload_to=mycards_image_file_path, null=True)
     points = models.IntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
