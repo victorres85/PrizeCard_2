@@ -88,8 +88,6 @@ class Company(models.Model):
     active = models.BooleanField(default=True)
     lat = models.CharField(max_length=20, null=True, blank=True)
     long = models.CharField(max_length=20, null=True, blank=True)
-    logo = models.ImageField(
-        upload_to=company_image_file_path, null=True, blank=True)
 
     def __str__(self):
         return self.company_name
@@ -101,6 +99,12 @@ class Company(models.Model):
         self.long = location.longitude
 
         return super().save(*args, **kwargs)
+
+
+class CompanyLogo(models.Model):
+    company = models.OneToOneField(Company, on_delete=models.CASCADE)
+    logo = models.ImageField(
+        upload_to=company_image_file_path, null=True, blank=True)
 
 
 class Card(models.Model):

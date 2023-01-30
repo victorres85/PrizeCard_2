@@ -1,7 +1,7 @@
 """Serializer for company APIs."""
 
 from rest_framework import serializers
-from core.models import Company
+from core.models import Company, CompanyLogo
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class CompanyImageSerializer(serializers.ModelSerializer):
     """Serializer for uploading images to companies."""
 
     class Meta:
-        model = Company
-        fields = ['id', 'logo']
+        model = CompanyLogo
+        fields = ['id', 'company', 'logo']
         read_only_fields = ['id']
         extra_kwargs = {'logo': {'required': 'True'}}

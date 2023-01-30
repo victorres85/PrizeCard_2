@@ -1,13 +1,13 @@
 """Views for the company APIs."""
 
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Company
+from core.models import Company, CompanyLogo
 from company import serializers
 
 
@@ -26,12 +26,6 @@ class CompanyViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Retrieve cards for authenticated user."""
         return self.queryset.filter(user=self.request.user).order_by('-id')
-
-    def get_serializer_class(self):
-        if self.action == 'upload_image':
-            return serializers.CompanyImageSerializer
-
-        return self.serializer_class
 
     def list(self, request, pk=None):
         """Return the serrializer class for request."""
@@ -69,7 +63,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
             companies, many=True, context={'distances': distances}).data
         companies_processed.sort(key=lambda x: x['distance'])
 
-        return Response(companies_processed.data, status=status.HTTP_200_OK)
+        return Response(companies_processed, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         """Create a new recipe."""
@@ -78,14 +72,32 @@ class CompanyViewSet(viewsets.ModelViewSet):
         else:
             raise 'only super user are allowed to create a company object'
 
-    @action(methods=['POST'], detail=True, url_path='upload-image')
-    def upload_image(self, request, pk=None):
+
+class CompanyLogoViewSet(viewsets.ModelViewSet):
+    """View for manage card APIs."""
+
+    serializer_class = serializers.CompanyImageSerializer
+    queryset = CompanyLogo.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    parser_classes = (FormParser, MultiPartParser)
+
+    def get_serializer_class(self):
+        if self.action == 'upload-image':
+            return self.serializer_class
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        """Create a new recipe."""
+        serializer.save()
+
+    # @action(methods=['POST'], detail=True, name='company-upload-image')
+    def post(self, request, pk=None):
         """Upload an image to company"""
         company = self.get_object()
         serializer = self.get_serializer(company, data=request.data)
 
         if serializer.is_valid():
-            print(serializer.data)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -1,6 +1,6 @@
 """Commands to create different objects"""
 
-from core.models import Company, Card, MyCards, Shopper
+from core.models import Company, Card, MyCards, Shopper, CompanyLogo
 from django.contrib.auth import get_user_model
 
 
@@ -65,3 +65,8 @@ def create_mycards(shopper, card, points=0, code=None):
     """Create and return a new MyCards objects."""
     return MyCards.objects.create(
         shopper=shopper, card=card, points=points, code=code)
+
+
+def create_logo(company, **params):
+    """Create and return a new CompanyLogo"""
+    return CompanyLogo.objects.create(company=company, **params)
