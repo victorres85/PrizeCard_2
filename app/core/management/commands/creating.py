@@ -67,7 +67,7 @@ def create_shopper(user, **params):
 
 def create_image(content, name):
     """Create an image with a text and return it"""
-    canva = Image.new('RGB', (350, 150), color= 'white')
+    canva = Image.new('RGB', (350, 150), color='white')
     image = ImageDraw.Draw(canva)
     image.text((10, 10), content, fill=(0, 0, 0))
     image_file = tempfile.NamedTemporaryFile(suffix='.jpg')

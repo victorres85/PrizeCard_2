@@ -3,7 +3,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from core import models
-import datetime
 from unittest.mock import patch
 from core.management.commands import creating
 
@@ -181,18 +180,10 @@ class ModelTests(TestCase):
         card = create_card()
         shopper = create_shopper()
 
-        content = f'''
-             Costa
-             {datetime.datetime.now() - datetime.timedelta(hours=1)}
-             Total  £2.00
-             '''
-        image_file = creating.create_image(content=content, name='teste3.jpg')
-
         mycards = models.MyCards.objects.create(
             shopper=shopper,
             card=card,
             points=1,
-            image=image_file,
         )
 
         self.assertEqual(str(mycards.card.company.company_name),
@@ -205,18 +196,11 @@ class ModelTests(TestCase):
         staff = creating.create_staff(email="mycardhistory@example.com")
         company = creating.create_company(user=staff)
         card = creating.create_card(company=company)
-        content = f'''
-             Costa
-             {datetime.datetime.now() - datetime.timedelta(hours=1)}
-             Total  £2.00
-             '''
-        image_file = creating.create_image(content=content, name='teste3.jpg')
 
         mycards = models.MyCards.objects.create(
             shopper=shopper,
             card=card,
             points=1,
-            image=image_file,
         )
 
         self.assertEqual(str(mycards.card.company.company_name),
@@ -230,18 +214,10 @@ class ModelTests(TestCase):
         user = creating.create_user(email='userreceipt@example.com')
         shopper = creating.create_shopper(user=user)
 
-        content = f'''
-             Costa
-             {datetime.datetime.now() - datetime.timedelta(hours=1)}
-             Total  £2.00
-             '''
-        image_file = creating.create_image(content=content, name='teste3.jpg')
-
         mycards = models.MyCards.objects.create(
             shopper=shopper,
             card=card,
             points=1,
-            image=image_file,
         )
 
         self.assertEqual(str(mycards.card.company.company_name),

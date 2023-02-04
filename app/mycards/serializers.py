@@ -21,6 +21,9 @@ class MycardsDetailSerializer(MycardsSerializer):
         fields = MycardsSerializer.Meta.fields + [
             'points', 'code']
 
+    def create(self, validated_data):
+        return MyCards.objects.create(**validated_data)
+
 
 class RewardSerializer(serializers.ModelSerializer):
     """Serializer for Rewards"""

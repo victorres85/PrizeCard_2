@@ -39,7 +39,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
         latitude = response.get("latitude")
         longitude = response.get("longitude")
 
-        if response['success'] == False:
+        if response['success'] is False:
             first = (51.633789, -0.125860)
             print('''
             IMPORTANT:

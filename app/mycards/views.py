@@ -1,5 +1,6 @@
 """Views for the mycards APIs."""
 
+from rest_framework import status
 from rest_framework.response import Response
 import re
 import pytesseract
@@ -61,16 +62,16 @@ class MycardsViewSet(viewsets.ModelViewSet):
         result = pytesseract.image_to_string(Image.open(image))
         company = myCards_obj.card.company.company_name
         total_points = myCards_obj.card.points_needed
-        date_pattern = "\d{2}[/-]\d{2}[/-]\d{4}"
-        hour_pattern = "\d{2}[:]\d{2}[:]\d{2}"
+        date_pattern = r"\d{2}[/-]\d{2}[/-]\d{4}"
+        hour_pattern = r"\d{2}[:]\d{2}[:]\d{2}"
         date = re.findall(date_pattern, result)
         hour = re.findall(hour_pattern, result)
         # validade image and add a point if everything is ok
         key = company + str(date) + str(hour)
-        print(key)
+
         if company in result:
-            if  not Receipt.objects.filter(receipt_key=key).exists:
-                raise(f'''Receipt already in use...''')
+            if not Receipt.objects.filter(receipt_key=key).exists:
+                raise 'Receipt already in use'
             else:
                 Receipt.objects.create(
                     receipt_key=key,
@@ -104,8 +105,6 @@ class MycardsViewSet(viewsets.ModelViewSet):
         serializer = serializers.MycardsSerializer(cards)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def perfor_create(self, serializer):
+    def perform_create(self, serializer):
         """Create a new recipe."""
-        print('perform create')
-        print(self.request)
         serializer.save()

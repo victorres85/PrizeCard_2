@@ -174,16 +174,18 @@ class MyCards(models.Model):
 
     def save(self, *args, **kwargs):
         """Create Receipt object"""
-        img_txt = pytesseract.image_to_string(Image.open(self.image))
-        date_pattern = "\d{2}[/-]\d{2}[/-]\d{4}"
-        hour_pattern = "\d{2}[:]\d{2}[:]\d{2}"
-        date = re.findall(date_pattern, img_txt)
-        hour = re.findall(hour_pattern, img_txt)
-        company = self.card.company.company_name
-        key = company + str(date) + str(hour)
-        Receipt.objects.create(
-            receipt_key=key,
-        )
+        if self.image:
+            img_txt = pytesseract.image_to_string(Image.open(self.image))
+            date_pattern = r"\d{2}[/-]\d{2}[/-]\d{4}"
+            hour_pattern = r"\d{2}[:]\d{2}[:]\d{2}"
+            date = re.findall(date_pattern, img_txt)
+            hour = re.findall(hour_pattern, img_txt)
+            company = self.card.company.company_name
+            key = company + str(date) + str(hour)
+            Receipt.objects.create(
+                receipt_key=key,
+            )
+        return super().save(*args, **kwargs)
 
 
 class MyCardsHistory(models.Model):

@@ -76,9 +76,7 @@ class PrivateCardAPITests(TestCase):
 
         res = self.client.post(url, payload, format='multipart')
 
-
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        print(res.data)
         mycards = MyCards.objects.get(id=res.data['id'])
         self.assertEqual(mycards.points, 1)
         self.assertEqual(mycards.shopper.pk, self.shopper.pk)
