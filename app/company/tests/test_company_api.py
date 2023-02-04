@@ -117,7 +117,7 @@ class PrivateCompanyAPITests(TestCase):
             'company_name': 'Company Sample',
             'address': 'Addres Sample',
             'city': 'City Sample',
-            'post_code': 'n146hb',
+            'post_code': 'cr01xx',
             'country': 'GB',
             'phone_number': '07518946014',
         }
@@ -171,7 +171,7 @@ class PrivateCompanyAPITests(TestCase):
         res = self.client.put(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        company.refresh_from_db()
+        company.refresh_from_db(self)
         for k, v in payload.items():
             self.assertEqual(getattr(company, k), v)
         self.assertEqual(company.user, self.user)

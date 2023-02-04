@@ -148,8 +148,11 @@ class PrivateShopperAPITests(TestCase):
         """Test full update of shopper."""
         shopper = create_shopper(
             user=self.user,
-            first_name="Sample shopper shopper name",
+            first_name="Sample shopper f name",
+            last_name="Sample shopper l name",
             address='Sample shopper address',
+            city='London',
+            post_code='N146HB',
         )
 
         payload = {

@@ -10,7 +10,7 @@ class MycardsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyCards
-        fields = ['id', 'shopper', 'card', 'updated', 'created']
+        fields = ['id', 'shopper', 'card', 'image', 'updated', 'created']
         read_only_fields = ['id', 'created']
 
 
@@ -18,4 +18,12 @@ class MycardsDetailSerializer(MycardsSerializer):
     """Serializer for MyCard detail view."""
 
     class Meta(MycardsSerializer.Meta):
-        fields = '__all__'
+        fields = MycardsSerializer.Meta.fields + [
+            'points', 'code']
+
+
+class RewardSerializer(serializers.ModelSerializer):
+    """Serializer for Rewards"""
+    class Meta:
+        model = MyCards
+        fields = ('code',)

@@ -11,6 +11,10 @@ from django.contrib.auth.models import (
     )
 from app import settings
 
+from PIL import Image
+import re
+import pytesseract
+
 from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -159,14 +163,27 @@ class MyCards(models.Model):
     shopper = models.ForeignKey(
         Shopper, on_delete=models.CASCADE)
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=mycards_image_file_path, null=True)
-    points = models.IntegerField(default=0)
+    image = models.ImageField(upload_to='mycards', null=True)
+    points = models.IntegerField(default=1)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     code = models.CharField(max_length=6, blank=True, null=True)
 
     def __str__(self):
         return self.card.company.company_name
+
+    def save(self, *args, **kwargs):
+        """Create Receipt object"""
+        img_txt = pytesseract.image_to_string(Image.open(self.image))
+        date_pattern = "\d{2}[/-]\d{2}[/-]\d{4}"
+        hour_pattern = "\d{2}[:]\d{2}[:]\d{2}"
+        date = re.findall(date_pattern, img_txt)
+        hour = re.findall(hour_pattern, img_txt)
+        company = self.card.company.company_name
+        key = company + str(date) + str(hour)
+        Receipt.objects.create(
+            receipt_key=key,
+        )
 
 
 class MyCardsHistory(models.Model):
@@ -188,5 +205,3 @@ class MyCardsHistory(models.Model):
 class Receipt(models.Model):
     """Receipt Object"""
     receipt_key = models.CharField(max_length=300, unique=True)
-    card = models.ForeignKey(Card, on_delete=models.DO_NOTHING)
-    Shopper = models.ForeignKey(Shopper, on_delete=models.DO_NOTHING)
