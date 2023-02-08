@@ -44,4 +44,4 @@ vine==5.0.0
 wcwidth==0.2.5
 whitenoise==6.2.0
 wrapt==1.14.1
-uwsgi>=2.0.19<2.1
+uwsgi>=2.0.19,<2.1
