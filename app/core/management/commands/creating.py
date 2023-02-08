@@ -3,6 +3,10 @@
 from core.models import Company, Card, MyCards, Shopper, CompanyLogo
 from django.contrib.auth import get_user_model
 
+from PIL import Image, ImageDraw
+
+import tempfile
+
 
 def create_user(email, password='Test123'):
     """Create and return a new user"""
@@ -61,10 +65,24 @@ def create_shopper(user, **params):
     return shopper
 
 
-def create_mycards(shopper, card, points=0, code=None):
+def create_image(content, name):
+    """Create an image with a text and return it"""
+    canva = Image.new('RGB', (350, 150), color='white')
+    image = ImageDraw.Draw(canva)
+    image.text((10, 10), content, fill=(0, 0, 0))
+    image_file = tempfile.NamedTemporaryFile(suffix='.jpg')
+    canva.save(image_file, 'jpeg')
+    image_file.seek(0)
+    image_file.name = name
+
+    return image_file
+
+
+def create_mycards(shopper, card, image, points=1):
     """Create and return a new MyCards objects."""
+    print(image)
     return MyCards.objects.create(
-        shopper=shopper, card=card, points=points, code=code)
+        shopper=shopper, card=card, image=image, points=points)
 
 
 def create_logo(company, **params):

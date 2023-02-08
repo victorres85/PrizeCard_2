@@ -117,7 +117,7 @@ class PrivateCompanyAPITests(TestCase):
             'company_name': 'Company Sample',
             'address': 'Addres Sample',
             'city': 'City Sample',
-            'post_code': 'n146hb',
+            'post_code': 'cr01xx',
             'country': 'GB',
             'phone_number': '07518946014',
         }

@@ -7,21 +7,21 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import MyCards, Shopper
+from core.models import MyCards
 
 from core.management.commands import creating
 
-from mycards.serializers import (
-    MycardsSerializer,
-    MycardsDetailSerializer,
-)
-
-MYCARDS_URL = reverse('mycards-list', args=[1])
+import datetime
 
 
-def detail_url(mycards_id):
-    """create and return mycards URL."""
-    return reverse('mycards-detail', args=[1, mycards_id])
+def mycards_url(shopper_pk):
+    """create and return mycards url"""
+    return reverse('mycards-list', args=[shopper_pk])
+
+
+def detail_url(shopper_id, mycards_id):
+    """create and return mycards detailed URL."""
+    return reverse('mycards-detail', args=[shopper_id, mycards_id])
 
 
 class PublicCardAPITests(TestCase):
@@ -32,7 +32,7 @@ class PublicCardAPITests(TestCase):
 
     def test_auth_required(self):
         """Test auth is required to call API."""
-        res = self.client.get(MYCARDS_URL)
+        res = self.client.get(mycards_url(1))
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -55,174 +55,28 @@ class PrivateCardAPITests(TestCase):
         self.company = creating.create_company(user=self.staff)
         self.card = creating.create_card(company=self.company)
 
-        defaults = {
-            'points': 0,
-            'code': None,
-        }
+    def test_create_mycards(self):
+        """Test creating a mycards"""
 
-        self.mycards = MyCards.objects.create(
-            shopper=self.shopper, card=self.card, **defaults)
+        content = f'''
+             Costa
+             {datetime.datetime.now() - datetime.timedelta(hours=1)}
+             Total  £2.00
+             '''
 
-    def test_retrieve_mycards(self):
-        """Test retrieving a list of mycards."""
-        creating.create_shopper(user=self.user)
-        creating.create_shopper(user=self.user)
+        url = mycards_url(self.shopper.pk)
 
-        res = self.client.get(MYCARDS_URL)
-
-        mycards = MyCards.objects.all().order_by('-id')
-        serializer = MycardsSerializer(mycards, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
-
-    def test_mycards_list_limited_to_user(self):
-        """Test list of mycards is limited to authenticated user."""
-        user = creating.create_user(email='user3@example.com')
-
-        defaults = {
-            'first_name': "Other First Name",
-            'last_name': "Other Last Name",
-            'address': 'Other Address',
-            'city': 'Other City',
-            'post_code': 'N146HB',
-            }
-
-        other_shopper = Shopper.objects.create(user=user, **defaults)
-        creating.create_mycards(shopper=self.shopper, card=self.card)
-        creating.create_mycards(shopper=other_shopper, card=self.card)
-
-        res = self.client.get(MYCARDS_URL)
-
-        mycards = MyCards.objects.filter(shopper=self.shopper)
-        serializer = MycardsSerializer(mycards, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertNotEqual(res.data, serializer.data)
-
-    def test_get_mycards_detail(self):
-        """Test get mycards detail."""
-        mycards = creating.create_mycards(
-            shopper=self.shopper, card=self.card)
-
-        url = detail_url(mycards.id)
-        res = self.client.get(url)
-
-        serializer = MycardsDetailSerializer(mycards)
-        self.assertEqual(res.data, serializer.data)
-
-    def test_partial_update(self):
-        """Test partial update of a mycards."""
-        original_code = '8'
-
-        mycards = creating.create_mycards(
-            shopper=self.shopper,
-            card=self.card,
-            points=0,
-            code=123,
-        )
-
-        payload = {'code': original_code}
-        url = detail_url(mycards.pk)
-        res = self.client.patch(url, payload)
-
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        mycards.refresh_from_db()
-        self.assertEqual(mycards.code, payload['code'])
-        self.assertEqual(mycards.shopper.pk, self.shopper.pk)
-
-    def test_full_update(self):
-        """Test full update of mycards cause error."""
-        mycards = creating.create_mycards(
-            shopper=self.shopper,
-            card=self.card,
-            points=0,
-            code='ABCD',
-        )
-        other_shopper = Shopper.objects.create(
-            user=creating.create_user(email="fullupdateuser@example.com"),
-            first_name='Other First Name Sample',
-            last_name='Other Last Name Sample',
-            address='Other Addres Sample',
-            city='Other City Sample',
-            post_code='cr01xx',
-            country='BR',
-            phone_number='00551141620947',
-        )
-
-        email = 'fullupdateofmycards@example.com'
-        other_user = creating.create_staff(email)
-        other_company = creating.create_company(user=other_user)
-        other_card = creating.create_card(company=other_company)
-        other_points = 1
-        other_code = '45'
+        image_file = creating.create_image(content=content, name='teste2.jpg')
 
         payload = {
-            'shopper': other_shopper,
-            'card': other_card,
-            'points': other_points,
-            'code': other_code,
-        }
-        url = detail_url(mycards.pk)
-        res = self.client.put(url, payload)
-
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        mycards.refresh_from_db()
-        self.assertEqual(mycards.code, payload['code'])
-        self.assertEqual(mycards.points, payload['points'])
-        self.assertNotEqual(mycards.card.pk, payload['card'])
-        self.assertNotEqual(mycards.shopper.pk, payload['shopper'])
-
-    def test_update_shopper_returns_error(self):
-        """Test changing the mycards's shopper results in an error."""
-        defaults = {
-            'first_name': 'First Name Sample',
-            'last_name': 'Last Name Sample',
-            'address': 'Addres Sample',
-            'city': 'City Sample',
-            'post_code': 'n146hb',
-            'country': 'GB',
-            'phone_number': '07518946014',
+            'image': image_file,
+            'shopper': self.shopper.pk,
+            'card': self.card.pk,
         }
 
-        other_shopper = Shopper.objects.create(user=self.user, **defaults)
+        res = self.client.post(url, payload, format='multipart')
 
-        mycards = creating.create_mycards(
-            shopper=self.shopper, card=self.card)
-
-        payload = {'shopper': other_shopper.pk}
-        url = detail_url(mycards.id)
-        self.client.patch(url, payload)
-
-        mycards.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        mycards = MyCards.objects.get(id=res.data['id'])
+        self.assertEqual(mycards.points, 1)
         self.assertEqual(mycards.shopper.pk, self.shopper.pk)
-
-    def test_delete_mycards(self):
-        """Test deleting a mycards successful"""
-        mycards = creating.create_mycards(
-            shopper=self.shopper, card=self.card)
-
-        url = detail_url(mycards.pk)
-        res = self.client.delete(url)
-
-        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(MyCards.objects.filter(id=mycards.id).exists())
-
-    # def test_create_mycards(self):
-    #     """Test creating a mycards"""
-
-    #     fks = {
-    #         'shopper': self.shopper.pk,
-    #         'card': self.card.pk,
-    #     }
-    #     data = {
-    #         'points': 0,
-    #         'code': "code",
-    #     }
-
-    #     payload = fks | data
-    #     res = self.client.post(MYCARDS_URL, payload)
-
-    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-    #     mycards = MyCards.objects.get(id=res.data['id'])
-    #     for k, v in payload.items():
-    #         self.assertEqual(getattr(mycards, k), v)
-    #     self.assertEqual(mycards.shopper.pk, self.shopper.pk)

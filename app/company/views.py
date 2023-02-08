@@ -38,7 +38,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
             '8eba29fcae0bbc63c1e93b8c370e4bcf').json()
         latitude = response.get("latitude")
         longitude = response.get("longitude")
-        if not response['success']:
+
+        if response['success'] is False:
             first = (51.633789, -0.125860)
             print('''
             IMPORTANT:
@@ -91,7 +92,6 @@ class CompanyLogoViewSet(viewsets.ModelViewSet):
         """Create a new recipe."""
         serializer.save()
 
-    # @action(methods=['POST'], detail=True, name='company-upload-image')
     def post(self, request, pk=None):
         """Upload an image to company"""
         company = self.get_object()
