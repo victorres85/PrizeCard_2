@@ -1,0 +1,1 @@
+web: gunicorn prizecard_2.wsgi
