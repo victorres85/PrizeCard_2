@@ -20,12 +20,13 @@ services:
 
   db:
     image: postgres:13-alpine
+    container_name: db
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=devdb
-      - POSTGRES_USER=devuser
-      - POSTGRES_PASSWORD=Vieira.141
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgr
     ports:
       - 5432:5432
 
